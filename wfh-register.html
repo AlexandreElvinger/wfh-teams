@@ -13,29 +13,29 @@
     <script>
         var status = document.getElementById('status');
         var targetUrl = 'https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx';
+        var authUrl = 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl);
 
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
+            status.textContent = 'Connecting to SharePoint...';
 
-            // First try direct navigation
-            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
-                // If that fails, authenticate first via SharePoint's Teams login endpoint
-                status.textContent = 'Authenticating...';
-                microsoftTeams.authentication.authenticate({
-                    url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl),
-                    width: 600,
-                    height: 535
-                }).then(function() {
-                    microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
-                        window.location.replace(targetUrl);
-                    });
-                }).catch(function() {
-                    // Last resort - just redirect
+            // Create hidden iframe to establish SharePoint auth cookies silently
+            var authFrame = document.createElement('iframe');
+            authFrame.style.display = 'none';
+            authFrame.src = authUrl;
+            document.body.appendChild(authFrame);
+
+            // Wait for auth to complete, then navigate
+            authFrame.onload = function() {
+                setTimeout(function() {
                     window.location.replace(targetUrl);
-                });
-            });
-        }).catch(function() {
-            window.location.replace(targetUrl);
+                }, 1000);
+            };
+
+            // Fallback if iframe doesn't fire onload within 5 seconds
+            setTimeout(function() {
+                window.location.replace(targetUrl);
+            }, 5000);
         });
     </script>
 </body>

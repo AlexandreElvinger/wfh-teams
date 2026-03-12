@@ -13,26 +13,26 @@
     <script>
         var status = document.getElementById('status');
         var targetUrl = 'https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx';
+        var authUrl = 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl);
 
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
+            status.textContent = 'Connecting to SharePoint...';
 
-            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
-                status.textContent = 'Authenticating...';
-                microsoftTeams.authentication.authenticate({
-                    url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl),
-                    width: 600,
-                    height: 535
-                }).then(function() {
-                    microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
-                        window.location.replace(targetUrl);
-                    });
-                }).catch(function() {
+            var authFrame = document.createElement('iframe');
+            authFrame.style.display = 'none';
+            authFrame.src = authUrl;
+            document.body.appendChild(authFrame);
+
+            authFrame.onload = function() {
+                setTimeout(function() {
                     window.location.replace(targetUrl);
-                });
-            });
-        }).catch(function() {
-            window.location.replace(targetUrl);
+                }, 1000);
+            };
+
+            setTimeout(function() {
+                window.location.replace(targetUrl);
+            }, 5000);
         });
     </script>
 </body>
