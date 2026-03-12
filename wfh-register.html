@@ -4,15 +4,32 @@
     <meta charset="UTF-8">
     <title>WFH Registration</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
+    <style>
+        body { font-family: Segoe UI, sans-serif; padding: 20px; }
+        #status { color: #666; }
+    </style>
 </head>
 <body>
+    <div id="status">Loading WFH Registration...</div>
     <script>
-        microsoftTeams.app.initialize().then(function() {
-            microsoftTeams.app.notifySuccess();
-            microsoftTeams.pages.navigateCrossDomain('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx').catch(function() {
-                window.location.replace('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx');
+        var status = document.getElementById('status');
+        try {
+            status.textContent = 'Initializing Teams SDK...';
+            microsoftTeams.app.initialize().then(function() {
+                status.textContent = 'SDK initialized. Navigating to SharePoint...';
+                microsoftTeams.app.notifySuccess();
+                microsoftTeams.pages.navigateCrossDomain('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx').catch(function(err) {
+                    status.textContent = 'navigateCrossDomain failed: ' + JSON.stringify(err) + '. Trying redirect...';
+                    setTimeout(function() {
+                        window.location.replace('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx');
+                    }, 2000);
+                });
+            }).catch(function(err) {
+                status.textContent = 'SDK init failed: ' + JSON.stringify(err);
             });
-        });
+        } catch(e) {
+            status.textContent = 'Error: ' + e.message;
+        }
     </script>
 </body>
 </html>
