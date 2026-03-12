@@ -5,31 +5,38 @@
     <title>WFH Registration</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
     <style>
-        body { font-family: Segoe UI, sans-serif; padding: 20px; }
-        #status { color: #666; }
+        body { font-family: Segoe UI, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }
     </style>
 </head>
 <body>
-    <div id="status">Loading WFH Registration...</div>
+    <div id="status">Loading...</div>
     <script>
         var status = document.getElementById('status');
-        try {
-            status.textContent = 'Initializing Teams SDK...';
-            microsoftTeams.app.initialize().then(function() {
-                status.textContent = 'SDK initialized. Navigating to SharePoint...';
-                microsoftTeams.app.notifySuccess();
-                microsoftTeams.pages.navigateCrossDomain('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx').catch(function(err) {
-                    status.textContent = 'navigateCrossDomain failed: ' + JSON.stringify(err) + '. Trying redirect...';
-                    setTimeout(function() {
-                        window.location.replace('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx');
-                    }, 2000);
+        var targetUrl = 'https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx';
+
+        microsoftTeams.app.initialize().then(function() {
+            microsoftTeams.app.notifySuccess();
+
+            // First try direct navigation
+            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
+                // If that fails, authenticate first via SharePoint's Teams login endpoint
+                status.textContent = 'Authenticating...';
+                microsoftTeams.authentication.authenticate({
+                    url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl),
+                    width: 600,
+                    height: 535
+                }).then(function() {
+                    microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
+                        window.location.replace(targetUrl);
+                    });
+                }).catch(function() {
+                    // Last resort - just redirect
+                    window.location.replace(targetUrl);
                 });
-            }).catch(function(err) {
-                status.textContent = 'SDK init failed: ' + JSON.stringify(err);
             });
-        } catch(e) {
-            status.textContent = 'Error: ' + e.message;
-        }
+        }).catch(function() {
+            window.location.replace(targetUrl);
+        });
     </script>
 </body>
 </html>

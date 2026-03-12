@@ -4,14 +4,35 @@
     <meta charset="UTF-8">
     <title>WFH Calendar</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
+    <style>
+        body { font-family: Segoe UI, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }
+    </style>
 </head>
 <body>
+    <div id="status">Loading...</div>
     <script>
+        var status = document.getElementById('status');
+        var targetUrl = 'https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx';
+
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            microsoftTeams.pages.navigateCrossDomain('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx').catch(function() {
-                window.location.replace('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx');
+
+            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
+                status.textContent = 'Authenticating...';
+                microsoftTeams.authentication.authenticate({
+                    url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl),
+                    width: 600,
+                    height: 535
+                }).then(function() {
+                    microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
+                        window.location.replace(targetUrl);
+                    });
+                }).catch(function() {
+                    window.location.replace(targetUrl);
+                });
             });
+        }).catch(function() {
+            window.location.replace(targetUrl);
         });
     </script>
 </body>
