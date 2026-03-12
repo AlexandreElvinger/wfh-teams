@@ -9,7 +9,9 @@
     <script>
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            window.location.replace('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx');
+            microsoftTeams.pages.navigateCrossDomain('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx').catch(function() {
+                window.location.replace('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx');
+            });
         });
     </script>
 </body>
