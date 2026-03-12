@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <title>WFH Calendar</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
 </head>
 <body>
-    <iframe id="content"></iframe>
     <script>
         microsoftTeams.app.initialize().then(function() {
-            document.getElementById('content').src = 'https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx';
+            microsoftTeams.app.notifySuccess();
+            window.location.replace('https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx');
         });
     </script>
 </body>
