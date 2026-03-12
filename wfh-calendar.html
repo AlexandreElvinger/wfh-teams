@@ -5,39 +5,36 @@
     <title>WFH Calendar</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; }
-        html, body { height: 100%; font-family: Segoe UI, sans-serif; }
-        .center {
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; height: 100%; color: #444; gap: 16px;
-        }
-        button {
-            background: #5B5FC7; color: white; border: none; padding: 12px 32px;
-            border-radius: 4px; font-size: 15px; cursor: pointer;
-        }
-        button:hover { background: #4B4FB7; }
-        p { font-size: 14px; color: #888; max-width: 400px; text-align: center; }
+        body { font-family: Segoe UI, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }
     </style>
 </head>
 <body>
-    <div class="center" id="main">
-        <p id="msg">Connecting...</p>
-        <button id="btn" style="display:none;" onclick="go()">Open WFH Calendar</button>
-    </div>
+    <div id="status">Connecting...</div>
     <script>
         var targetUrl = 'https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx';
+        var spHost = 'https://elvinger.sharepoint.com';
+        var spClientId = '00000003-0000-0ff1-ce00-000000000000';
 
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            document.getElementById('msg').textContent = 'Click below to open WFH Calendar';
-            document.getElementById('btn').style.display = 'block';
-        });
+            return microsoftTeams.app.getContext();
+        }).then(function(context) {
+            var loginHint = context.user.loginHint || context.user.userPrincipalName;
+            var tenantId = context.user.tenant.id;
 
-        function go() {
-            document.getElementById('msg').textContent = 'Loading...';
-            document.getElementById('btn').style.display = 'none';
-            window.open(targetUrl, '_self');
-        }
+            var authUrl = 'https://login.microsoftonline.com/' + tenantId + '/oauth2/v2.0/authorize'
+                + '?client_id=' + spClientId
+                + '&response_type=code'
+                + '&redirect_uri=' + encodeURIComponent(spHost + '/')
+                + '&scope=' + encodeURIComponent('openid profile ' + spHost + '/.default')
+                + '&login_hint=' + encodeURIComponent(loginHint)
+                + '&prompt=none'
+                + '&state=' + encodeURIComponent(targetUrl);
+
+            window.location.replace(authUrl);
+        }).catch(function(err) {
+            document.getElementById('status').textContent = 'Error: ' + JSON.stringify(err);
+        });
     </script>
 </body>
 </html>
