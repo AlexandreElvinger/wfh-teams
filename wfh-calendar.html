@@ -7,51 +7,36 @@
     <style>
         * { margin: 0; padding: 0; }
         html, body { height: 100%; font-family: Segoe UI, sans-serif; }
-        #auth-prompt {
+        .center {
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; height: 100%; color: #444; gap: 16px;
         }
-        #auth-prompt button {
+        button {
             background: #5B5FC7; color: white; border: none; padding: 12px 32px;
             border-radius: 4px; font-size: 15px; cursor: pointer;
         }
-        #auth-prompt button:hover { background: #4B4FB7; }
-        #auth-prompt p { font-size: 14px; color: #888; max-width: 400px; text-align: center; }
-        #loading { display: flex; justify-content: center; align-items: center; height: 100%; color: #444; }
+        button:hover { background: #4B4FB7; }
+        p { font-size: 14px; color: #888; max-width: 400px; text-align: center; }
     </style>
 </head>
 <body>
-    <div id="loading">Loading...</div>
-    <div id="auth-prompt" style="display:none;">
-        <p>First-time setup: click below to connect to SharePoint. You only need to do this once.</p>
-        <button onclick="connectToSharePoint()">Connect to SharePoint</button>
+    <div class="center" id="main">
+        <p id="msg">Connecting...</p>
+        <button id="btn" style="display:none;" onclick="go()">Open WFH Calendar</button>
     </div>
     <script>
         var targetUrl = 'https://elvinger.sharepoint.com/Lists/WFH%20Tracker/WFH%20Calendar%20View.aspx';
 
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-
-            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('auth-prompt').style.display = 'flex';
-            });
+            document.getElementById('msg').textContent = 'Click below to open WFH Calendar';
+            document.getElementById('btn').style.display = 'block';
         });
 
-        function connectToSharePoint() {
-            document.getElementById('auth-prompt').style.display = 'none';
-            document.getElementById('loading').style.display = 'flex';
-            document.getElementById('loading').textContent = 'Connecting...';
-
-            microsoftTeams.authentication.authenticate({
-                url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent('https://elvinger.sharepoint.com'),
-                width: 600,
-                height: 535
-            }).then(function() {
-                window.location.replace(targetUrl);
-            }).catch(function() {
-                window.location.replace(targetUrl);
-            });
+        function go() {
+            document.getElementById('msg').textContent = 'Loading...';
+            document.getElementById('btn').style.display = 'none';
+            window.open(targetUrl, '_self');
         }
     </script>
 </body>
