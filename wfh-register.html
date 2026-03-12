@@ -5,38 +5,56 @@
     <title>WFH Registration</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
     <style>
-        body { font-family: Segoe UI, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }
+        * { margin: 0; padding: 0; }
+        html, body { height: 100%; font-family: Segoe UI, sans-serif; }
+        #auth-prompt {
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; height: 100%; color: #444; gap: 16px;
+        }
+        #auth-prompt button {
+            background: #5B5FC7; color: white; border: none; padding: 12px 32px;
+            border-radius: 4px; font-size: 15px; cursor: pointer;
+        }
+        #auth-prompt button:hover { background: #4B4FB7; }
+        #auth-prompt p { font-size: 14px; color: #888; max-width: 400px; text-align: center; }
+        #loading { display: flex; justify-content: center; align-items: center; height: 100%; color: #444; }
     </style>
 </head>
 <body>
-    <div id="status">Loading...</div>
+    <div id="loading">Loading...</div>
+    <div id="auth-prompt" style="display:none;">
+        <p>First-time setup: click below to connect to SharePoint. You only need to do this once.</p>
+        <button onclick="connectToSharePoint()">Connect to SharePoint</button>
+    </div>
     <script>
-        var status = document.getElementById('status');
         var targetUrl = 'https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx';
-        var authUrl = 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl);
 
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            status.textContent = 'Connecting to SharePoint...';
 
-            // Create hidden iframe to establish SharePoint auth cookies silently
-            var authFrame = document.createElement('iframe');
-            authFrame.style.display = 'none';
-            authFrame.src = authUrl;
-            document.body.appendChild(authFrame);
-
-            // Wait for auth to complete, then navigate
-            authFrame.onload = function() {
-                setTimeout(function() {
-                    window.location.replace(targetUrl);
-                }, 1000);
-            };
-
-            // Fallback if iframe doesn't fire onload within 5 seconds
-            setTimeout(function() {
-                window.location.replace(targetUrl);
-            }, 5000);
+            // Try direct redirect first
+            microsoftTeams.pages.navigateCrossDomain(targetUrl).catch(function() {
+                // navigateCrossDomain failed — need auth
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('auth-prompt').style.display = 'flex';
+            });
         });
+
+        function connectToSharePoint() {
+            document.getElementById('auth-prompt').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('loading').textContent = 'Connecting...';
+
+            microsoftTeams.authentication.authenticate({
+                url: 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent('https://elvinger.sharepoint.com'),
+                width: 600,
+                height: 535
+            }).then(function() {
+                window.location.replace(targetUrl);
+            }).catch(function() {
+                window.location.replace(targetUrl);
+            });
+        }
     </script>
 </body>
 </html>
