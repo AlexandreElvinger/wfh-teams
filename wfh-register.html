@@ -4,37 +4,12 @@
     <meta charset="UTF-8">
     <title>WFH Registration</title>
     <script src="https://res.cdn.office.net/teams-js/2.31.1/js/MicrosoftTeams.min.js"></script>
-    <style>
-        body { font-family: Segoe UI, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }
-    </style>
 </head>
 <body>
-    <div id="status">Connecting...</div>
     <script>
-        var targetUrl = 'https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx';
-        var spHost = 'https://elvinger.sharepoint.com';
-        var spClientId = '00000003-0000-0ff1-ce00-000000000000'; // SharePoint's well-known Azure AD client ID
-
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            return microsoftTeams.app.getContext();
-        }).then(function(context) {
-            var loginHint = context.user.loginHint || context.user.userPrincipalName;
-            var tenantId = context.user.tenant.id;
-
-            // Silent Azure AD auth redirect → establishes SharePoint session cookies → lands on target page
-            var authUrl = 'https://login.microsoftonline.com/' + tenantId + '/oauth2/v2.0/authorize'
-                + '?client_id=' + spClientId
-                + '&response_type=code'
-                + '&redirect_uri=' + encodeURIComponent(spHost + '/')
-                + '&scope=' + encodeURIComponent('openid profile ' + spHost + '/.default')
-                + '&login_hint=' + encodeURIComponent(loginHint)
-                + '&prompt=none'
-                + '&state=' + encodeURIComponent(targetUrl);
-
-            window.location.replace(authUrl);
-        }).catch(function(err) {
-            document.getElementById('status').textContent = 'Error: ' + JSON.stringify(err);
+            window.location.replace('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx');
         });
     </script>
 </body>
