@@ -7,9 +7,12 @@
 </head>
 <body>
     <script>
+        var targetUrl = 'https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx';
+        var authUrl = 'https://elvinger.sharepoint.com/_layouts/15/teamslogon.aspx?spfx=true&dest=' + encodeURIComponent(targetUrl);
+
         microsoftTeams.app.initialize().then(function() {
             microsoftTeams.app.notifySuccess();
-            window.location.replace('https://elvinger.sharepoint.com/SitePages/WFH-Registration.aspx');
+            window.location.replace(authUrl);
         });
     </script>
 </body>
